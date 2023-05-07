@@ -23,6 +23,12 @@ function App() {
     }
   };
 
+  const handleWatchlistRemove = (stockToRemove) => {
+    setWatchlist(
+      watchlist.filter((stock) => stock.symbol !== stockToRemove.symbol)
+    );
+  };
+
   useEffect(() => {
     const fetchStockList = async () => {
       try {
@@ -88,7 +94,10 @@ function App() {
       <h2>Watchlist:</h2>
       <ul>
         {watchlist.map((stock, index) => (
-          <li key={`${stock.symbol}-${index}`}>
+          <li
+            key={`${stock.symbol}-${index}`}
+            onClick={() => handleWatchlistRemove(stock)}
+          >
             {stock.symbol || ""} - {stock.name || ""} - {stock.type || ""} -{" "}
             {stock.region || ""}
           </li>
