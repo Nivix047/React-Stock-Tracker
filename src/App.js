@@ -6,6 +6,7 @@ function App() {
   const [stockList, setStockList] = useState([]);
   const [selectedStock, setSelectedStock] = useState(null);
   const [watchlist, setWatchlist] = useState([]);
+  const [stockDetails, setStockDetails] = useState(null);
 
   const apiKey = process.env.REACT_APP_ALPHA_VANTAGE_API_KEY;
 
@@ -27,6 +28,24 @@ function App() {
     setWatchlist(
       watchlist.filter((stock) => stock.symbol !== stockToRemove.symbol)
     );
+  };
+
+  const fetchStockDetails = async (symbol) => {
+    try {
+      const response = await axios.get("https://www.alphavantage.co/query", {
+        params: {
+          function: "GLOBAL_QUOTE",
+          symbol: symbol,
+          apikey: apiKey,
+        },
+      });
+
+      if (response.status === 200) {
+        setStockDetails(response.data["Global Quote"]);
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
   };
 
   useEffect(() => {
@@ -70,12 +89,12 @@ function App() {
       <h2>Search Results:</h2>
       <ul>
         {stockList.map((stock, index) => (
-          <li
-            key={`${stock.symbol}-${index}`}
-            onClick={() => handleStockSelect(stock)}
-          >
-            {stock.symbol || ""} - {stock.name || ""} - {stock.type || ""} -{" "}
-            {stock.region || ""}
+          <li key={`${stock.symbol}-${index}`}>
+            {stock.symbol || ""} - {stock.name || ""}
+            <button onClick={() => handleStockSelect(stock)}>Select</button>
+            <button onClick={() => handleWatchlistAdd(stock)}>
+              Add to Watchlist
+            </button>
           </li>
         ))}
       </ul>
@@ -84,22 +103,36 @@ function App() {
         <div>
           <h2>Selected Stock:</h2>
           <p>
-            {selectedStock.symbol || ""} - {selectedStock.name || ""} -{" "}
-            {selectedStock.type || ""} - {selectedStock.region || ""}
+            {selectedStock.symbol || ""} - {selectedStock.name || ""}
           </p>
-          <button onClick={handleWatchlistAdd}>Add to Watchlist</button>
+          <button onClick={() => fetchStockDetails(selectedStock.symbol)}>
+            Fetch Stock Details
+          </button>
+        </div>
+      )}
+
+      {stockDetails && (
+        <div>
+          <h2>Stock Details:</h2>
+          <table>
+            <tbody>
+              {Object.entries(stockDetails).map(([key, value]) => (
+                <tr key={key}>
+                  <td>{key}</td>
+                  <td>{value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
       <h2>Watchlist:</h2>
       <ul>
         {watchlist.map((stock, index) => (
-          <li
-            key={`${stock.symbol}-${index}`}
-            onClick={() => handleWatchlistRemove(stock)}
-          >
-            {stock.symbol || ""} - {stock.name || ""} - {stock.type || ""} -{" "}
-            {stock.region || ""}
+          <li key={`${stock.symbol}-${index}`}>
+            {stock.symbol || ""} - {stock.name || ""}
+            <button onClick={() => handleWatchlistRemove(stock)}>Remove</button>
           </li>
         ))}
       </ul>
