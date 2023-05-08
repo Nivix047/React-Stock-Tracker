@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 
 const StockDetails = ({ symbol, setStockDataFetched }) => {
   const [stockData, setStockData] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (symbol) {
       fetchData(symbol);
+      setStockDataFetched(true);
     }
-  }, [symbol]);
+  }, [symbol, setStockDataFetched]);
 
   const fetchData = async (symbol) => {
     console.log(`Fetching data for ${symbol}`);
@@ -16,12 +18,26 @@ const StockDetails = ({ symbol, setStockDataFetched }) => {
     const response = await fetch(
       `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=${API_KEY}`
     );
-    const data = await response.json();
-    setStockData(data["Time Series (Daily)"]);
+    if (response.ok) {
+      const data = await response.json();
+      setStockData(data["Time Series (Daily)"]);
+      setError(null);
+    } else {
+      setStockData(null);
+      setError("Failed to fetch stock data. Please try again.");
+    }
   };
 
   if (!stockData) {
-    return null;
+    return (
+      <div>
+        {error ? (
+          <p style={{ color: "red" }}>{error}</p>
+        ) : (
+          <p>Loading stock data...</p>
+        )}
+      </div>
+    );
   }
 
   const dataEntries = Object.entries(stockData);
@@ -36,7 +52,6 @@ const StockDetails = ({ symbol, setStockDataFetched }) => {
           </li>
         ))}
       </ul>
-      <button onClick={() => setStockDataFetched(false)}>Close</button>
     </div>
   );
 };

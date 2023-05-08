@@ -9,6 +9,8 @@ const Home = () => {
     JSON.parse(localStorage.getItem("watchlist")) || []
   );
   const [selectedSymbol, setSelectedSymbol] = useState(null);
+  const [stockDataFetched, setStockDataFetched] = useState(false);
+  const [searchError, setSearchError] = useState(null);
 
   useEffect(() => {
     localStorage.setItem("watchlist", JSON.stringify(watchlist));
@@ -34,14 +36,26 @@ const Home = () => {
   const searchStocks = async (searchTerm) => {
     if (searchTerm.trim() === "") {
       setSearchResults([]);
+      setSearchError(null);
     } else {
       const API_KEY = process.env.REACT_APP_ALPHA_VANTAGE_API_KEY;
       const response = await fetch(
         `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${searchTerm}&apikey=${API_KEY}`
       );
-      const data = await response.json();
-      setSearchResults(data.bestMatches || []);
+      if (response.ok) {
+        const data = await response.json();
+        setSearchResults(data.bestMatches || []);
+        setSearchError(null);
+      } else {
+        setSearchResults([]);
+        setSearchError("Failed to fetch search results. Please try again.");
+      }
     }
+  };
+
+  const closeStockDetails = () => {
+    setSelectedSymbol(null);
+    setStockDataFetched(false);
   };
 
   return (
@@ -56,6 +70,7 @@ const Home = () => {
           onChange={(e) => searchStocks(e.target.value)}
         />
       </div>
+      {searchError && <p style={{ color: "red" }}>{searchError}</p>}
       <SearchResult
         searchResults={searchResults}
         addToWatchlist={addToWatchlist}
@@ -66,7 +81,14 @@ const Home = () => {
         removeFromWatchlist={removeFromWatchlist}
         setSelectedSymbol={setSelectedSymbol}
       />
-      {selectedSymbol && <StockDetails symbol={selectedSymbol} />}
+      {selectedSymbol && (
+        <StockDetails
+          symbol={selectedSymbol}
+          setStockDataFetched={setStockDataFetched}
+        />
+      )}
+
+      {stockDataFetched && <button onClick={closeStockDetails}>Close</button>}
     </div>
   );
 };
