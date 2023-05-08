@@ -1,25 +1,24 @@
 import React from "react";
 
-const Watchlist = ({ watchlist, fetchStockData, removeFromWatchlist }) => {
-  const handleClick = (symbol) => {
-    fetchStockData(symbol);
-  };
-
-  const handleRemove = (symbol) => {
-    removeFromWatchlist(symbol);
-  };
-
+const Watchlist = ({ watchlist, removeFromWatchlist, setSelectedSymbol }) => {
   return (
     <div>
-      <h3>Watchlist:</h3>
+      <h2>Watchlist</h2>
       <ul>
-        {watchlist.map((stock, index) => (
-          <li key={index}>
-            {stock.symbol} - {stock.name} ({stock.type}, {stock.region})
-            <button onClick={() => handleClick(stock.symbol)}>
-              Fetch Data
+        {watchlist.map((stock) => (
+          <li
+            key={stock["1. symbol"]}
+            onClick={() => setSelectedSymbol(stock["1. symbol"])}
+          >
+            {stock["2. name"]} ({stock["1. symbol"]})
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                removeFromWatchlist(stock["1. symbol"]);
+              }}
+            >
+              -
             </button>
-            <button onClick={() => handleRemove(stock.symbol)}>Remove</button>
           </li>
         ))}
       </ul>

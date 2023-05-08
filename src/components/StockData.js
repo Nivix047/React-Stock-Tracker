@@ -1,26 +1,30 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-const StockData = ({ stockData }) => {
-  if (!stockData) {
-    return null;
-  }
+const StockData = ({ symbol }) => {
+  const [stockData, setStockData] = useState(null);
 
-  const dataEntries = Object.entries(stockData);
+  useEffect(() => {
+    const fetchData = async () => {
+      const API_KEY = process.env.REACT_APP_ALPHA_VANTAGE_API_KEY;
+      const response = await fetch(
+        `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=${API_KEY}`
+      );
+      const data = await response.json();
+      setStockData(data);
+    };
+
+    if (symbol) {
+      fetchData();
+    }
+  }, [symbol]);
 
   return (
     <div>
-      <h2>Stock Data:</h2>
-      {dataEntries.length > 0 && <h3>{dataEntries[0][1]}</h3>}
-      <ul>
-        {dataEntries.slice(1).map(([key, value]) => {
-          const displayName = key.split(" ").slice(1).join(" ");
-          return (
-            <li key={key}>
-              {displayName}: {value}
-            </li>
-          );
-        })}
-      </ul>
+      {stockData ? (
+        <pre>{JSON.stringify(stockData, null, 2)}</pre>
+      ) : (
+        <p>No stock data available</p>
+      )}
     </div>
   );
 };

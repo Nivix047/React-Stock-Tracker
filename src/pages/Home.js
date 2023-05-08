@@ -1,105 +1,72 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import SearchBar from "../components/SearchBar";
 import SearchResult from "../components/SearchResult";
 import Watchlist from "../components/Watchlist";
-import StockData from "../components/StockData";
+import StockDetails from "../components/StockDetails";
 
 const Home = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [stockList, setStockList] = useState([]);
-  const [watchlist, setWatchlist] = useState(() => {
-    const storedWatchlist = localStorage.getItem("watchlist");
-    return storedWatchlist
-      ? JSON.parse(storedWatchlist).filter((stock) => stock.symbol)
-      : [];
-  });
-
-  const [stockData, setStockData] = useState(null);
-
-  const apiKey = process.env.REACT_APP_ALPHA_VANTAGE_API_KEY;
-
-  const fetchStockData = async (symbol) => {
-    try {
-      const response = await axios.get("https://www.alphavantage.co/query", {
-        params: {
-          function: "GLOBAL_QUOTE",
-          symbol: symbol,
-          apikey: apiKey,
-        },
-      });
-
-      console.log("Stock data API response:", response);
-
-      if (response.status === 200) {
-        setStockData(response.data["Global Quote"]);
-      }
-    } catch (err) {
-      console.log(err.message);
-    }
-  };
-
-  const removeFromWatchlist = (symbol) => {
-    setWatchlist((prevWatchlist) => {
-      const updatedWatchlist = prevWatchlist.filter(
-        (stock) => stock.symbol !== symbol
-      );
-      localStorage.setItem("watchlist", JSON.stringify(updatedWatchlist));
-      return updatedWatchlist;
-    });
-  };
-
-  useEffect(() => {
-    const fetchStockList = async () => {
-      try {
-        const response = await axios.get("https://www.alphavantage.co/query", {
-          params: {
-            function: "SYMBOL_SEARCH",
-            keywords: searchTerm,
-            apikey: apiKey,
-          },
-        });
-
-        if (response.status === 200) {
-          setStockList(
-            response.data.bestMatches
-              ? response.data.bestMatches.map((match) => ({
-                  symbol: match["1. symbol"] || "",
-                  name: match["2. name"] || "",
-                  type: match["3. type"] || "",
-                  region: match["4. region"] || "",
-                }))
-              : []
-          );
-        }
-      } catch (err) {
-        console.log(err.message);
-      }
-    };
-
-    if (searchTerm) {
-      fetchStockList();
-    }
-  }, [searchTerm, apiKey]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [watchlist, setWatchlist] = useState(
+    JSON.parse(localStorage.getItem("watchlist")) || []
+  );
+  const [selectedSymbol, setSelectedSymbol] = useState(null);
 
   useEffect(() => {
     localStorage.setItem("watchlist", JSON.stringify(watchlist));
   }, [watchlist]);
 
+  const addToWatchlist = (stock) => {
+    const stockToAdd = {
+      "1. symbol": stock["1. symbol"],
+      "2. name": stock["2. name"],
+    };
+
+    if (
+      !watchlist.some((item) => item["1. symbol"] === stockToAdd["1. symbol"])
+    ) {
+      setWatchlist([...watchlist, stockToAdd]);
+    }
+  };
+
+  const removeFromWatchlist = (symbol) => {
+    setWatchlist(watchlist.filter((stock) => stock["1. symbol"] !== symbol));
+  };
+
+  const searchStocks = async (searchTerm) => {
+    if (searchTerm.trim() === "") {
+      setSearchResults([]);
+    } else {
+      const API_KEY = process.env.REACT_APP_ALPHA_VANTAGE_API_KEY;
+      const response = await fetch(
+        `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${searchTerm}&apikey=${API_KEY}`
+      );
+      const data = await response.json();
+      setSearchResults(data.bestMatches || []);
+    }
+  };
+
   return (
     <div>
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <h1>Stock App</h1>
+      <div>
+        <label htmlFor="search">Search stocks:</label>
+        <input
+          type="text"
+          id="search"
+          name="search"
+          onChange={(e) => searchStocks(e.target.value)}
+        />
+      </div>
       <SearchResult
-        stockList={stockList}
-        addToWatchlist={setWatchlist}
-        watchlist={watchlist}
+        searchResults={searchResults}
+        addToWatchlist={addToWatchlist}
+        setSelectedSymbol={setSelectedSymbol}
       />
       <Watchlist
         watchlist={watchlist}
-        fetchStockData={fetchStockData}
         removeFromWatchlist={removeFromWatchlist}
+        setSelectedSymbol={setSelectedSymbol}
       />
-      <StockData stockData={stockData} />
+      {selectedSymbol && <StockDetails symbol={selectedSymbol} />}
     </div>
   );
 };
