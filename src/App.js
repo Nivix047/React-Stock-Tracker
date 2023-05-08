@@ -4,9 +4,8 @@ import axios from "axios";
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [stockList, setStockList] = useState([]);
-  const [selectedStock, setSelectedStock] = useState(null);
   const [watchlist, setWatchlist] = useState([]);
-  const [stockDetails, setStockDetails] = useState(null);
+  const [stockData, setStockData] = useState(null);
 
   const apiKey = process.env.REACT_APP_ALPHA_VANTAGE_API_KEY;
 
@@ -14,23 +13,7 @@ function App() {
     setSearchTerm(event.target.value);
   };
 
-  const handleStockSelect = (stock) => {
-    setSelectedStock(stock);
-  };
-
-  const handleWatchlistAdd = () => {
-    if (!watchlist.some((s) => s.symbol === selectedStock.symbol)) {
-      setWatchlist([...watchlist, selectedStock]);
-    }
-  };
-
-  const handleWatchlistRemove = (stockToRemove) => {
-    setWatchlist(
-      watchlist.filter((stock) => stock.symbol !== stockToRemove.symbol)
-    );
-  };
-
-  const fetchStockDetails = async (symbol) => {
+  const fetchStockData = async (symbol) => {
     try {
       const response = await axios.get("https://www.alphavantage.co/query", {
         params: {
@@ -41,11 +24,15 @@ function App() {
       });
 
       if (response.status === 200) {
-        setStockDetails(response.data["Global Quote"]);
+        setStockData(response.data["Global Quote"]);
       }
     } catch (err) {
       console.log(err.message);
     }
+  };
+
+  const removeFromWatchlist = (symbol) => {
+    setWatchlist(watchlist.filter((stock) => stock.symbol !== symbol));
   };
 
   useEffect(() => {
@@ -90,52 +77,41 @@ function App() {
       <ul>
         {stockList.map((stock, index) => (
           <li key={`${stock.symbol}-${index}`}>
-            {stock.symbol || ""} - {stock.name || ""}
-            <button onClick={() => handleStockSelect(stock)}>Select</button>
-            <button onClick={() => handleWatchlistAdd(stock)}>
+            {stock.symbol} - {stock.name}
+            <button onClick={() => setWatchlist([...watchlist, stock])}>
               Add to Watchlist
             </button>
           </li>
         ))}
       </ul>
 
-      {selectedStock && (
-        <div>
-          <h2>Selected Stock:</h2>
-          <p>
-            {selectedStock.symbol || ""} - {selectedStock.name || ""}
-          </p>
-          <button onClick={() => fetchStockDetails(selectedStock.symbol)}>
-            Fetch Stock Details
-          </button>
-        </div>
-      )}
-
-      {stockDetails && (
-        <div>
-          <h2>Stock Details:</h2>
-          <table>
-            <tbody>
-              {Object.entries(stockDetails).map(([key, value]) => (
-                <tr key={key}>
-                  <td>{key}</td>
-                  <td>{value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       <h2>Watchlist:</h2>
       <ul>
         {watchlist.map((stock, index) => (
           <li key={`${stock.symbol}-${index}`}>
-            {stock.symbol || ""} - {stock.name || ""}
-            <button onClick={() => handleWatchlistRemove(stock)}>Remove</button>
+            {stock.symbol} - {stock.name}
+            <button onClick={() => fetchStockData(stock.symbol)}>
+              Fetch Stock Data
+            </button>
+            <button onClick={() => removeFromWatchlist(stock.symbol)}>
+              Remove from Watchlist
+            </button>
           </li>
         ))}
       </ul>
+
+      {stockData && (
+        <div>
+          <h2>Stock Data:</h2>
+          <ul>
+            {Object.keys(stockData).map((key, index) => (
+              <li key={index}>
+                {key}: {stockData[key]}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
