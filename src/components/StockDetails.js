@@ -79,11 +79,19 @@ const StockDetails = ({ symbol, setStockDataFetched }) => {
     ],
   };
 
+  // Define responsive options
+  const responsiveOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+  };
+
   // Return stock details JSX with chart
   return (
     <div>
       <h2>Stock Details</h2>
-      <Line data={chartData} />
+      <div style={{ maxWidth: "100%", height: "300px" }}>
+        <Line data={chartData} options={responsiveOptions} />
+      </div>
     </div>
   );
 };
