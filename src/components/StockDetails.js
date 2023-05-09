@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 
+// Stock details component
 const StockDetails = ({ symbol, setStockDataFetched }) => {
+  // Declare state variables
   const [stockData, setStockData] = useState(null);
   const [error, setError] = useState(null);
 
+  // Fetch stock data when symbol changes
   useEffect(() => {
     if (symbol) {
       fetchData(symbol);
@@ -11,6 +14,7 @@ const StockDetails = ({ symbol, setStockDataFetched }) => {
     }
   }, [symbol, setStockDataFetched]);
 
+  // Fetch stock data
   const fetchData = async (symbol) => {
     console.log(`Fetching data for ${symbol}`);
 
@@ -28,20 +32,23 @@ const StockDetails = ({ symbol, setStockDataFetched }) => {
     }
   };
 
+  // Display stock data
   if (!stockData) {
     return (
       <div>
         {error ? (
           <p style={{ color: "red" }}>{error}</p>
         ) : (
-          <p>Loading stock data...</p>
+          <p>Loading stock data ...</p>
         )}
       </div>
     );
   }
 
+  // Get entries from stock data object
   const dataEntries = Object.entries(stockData);
 
+  // Return stock details JSX
   return (
     <div>
       <h2>Stock Details</h2>

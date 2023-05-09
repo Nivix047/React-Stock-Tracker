@@ -1,6 +1,8 @@
 import React from "react";
 
+// Watchlist component
 const Watchlist = ({ watchlist, removeFromWatchlist, setSelectedSymbol }) => {
+  // Return watchlist JSX
   return (
     <div>
       <h2>Watchlist</h2>

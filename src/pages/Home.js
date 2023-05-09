@@ -3,7 +3,9 @@ import SearchResult from "../components/SearchResult";
 import Watchlist from "../components/Watchlist";
 import StockDetails from "../components/StockDetails";
 
+// Home component
 const Home = () => {
+  // Declare state variables
   const [searchResults, setSearchResults] = useState([]);
   const [watchlist, setWatchlist] = useState(
     JSON.parse(localStorage.getItem("watchlist")) || []
@@ -12,10 +14,12 @@ const Home = () => {
   const [stockDataFetched, setStockDataFetched] = useState(false);
   const [searchError, setSearchError] = useState(null);
 
+  // Save watchlist to local storage when it changes
   useEffect(() => {
     localStorage.setItem("watchlist", JSON.stringify(watchlist));
   }, [watchlist]);
 
+  // Add stock to watchlist
   const addToWatchlist = (stock) => {
     const stockToAdd = {
       "1. symbol": stock["1. symbol"],
@@ -29,10 +33,12 @@ const Home = () => {
     }
   };
 
+  // Remove stock from watchlist
   const removeFromWatchlist = (symbol) => {
     setWatchlist(watchlist.filter((stock) => stock["1. symbol"] !== symbol));
   };
 
+  // Search for stocks based on search term
   const searchStocks = async (searchTerm) => {
     if (searchTerm.trim() === "") {
       setSearchResults([]);
@@ -53,11 +59,13 @@ const Home = () => {
     }
   };
 
+  // Close stock details
   const closeStockDetails = () => {
     setSelectedSymbol(null);
     setStockDataFetched(false);
   };
 
+  // Return home JSX
   return (
     <div>
       <h1>Stock App</h1>
@@ -87,7 +95,6 @@ const Home = () => {
           setStockDataFetched={setStockDataFetched}
         />
       )}
-
       {stockDataFetched && <button onClick={closeStockDetails}>Close</button>}
     </div>
   );
