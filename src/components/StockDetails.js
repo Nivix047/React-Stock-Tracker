@@ -1,6 +1,24 @@
 import React, { useState, useEffect } from "react";
+import { Chart } from "chart.js";
+import { Line } from "react-chartjs-2";
+import {
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController,
+} from "chart.js";
 
-// Stock details component
+// Register required chart components with Chart.js library
+Chart.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  LineController
+);
+
+// StockDetails component
 const StockDetails = ({ symbol, setStockDataFetched }) => {
   // Declare state variables
   const [stockData, setStockData] = useState(null);
@@ -14,7 +32,7 @@ const StockDetails = ({ symbol, setStockDataFetched }) => {
     }
   }, [symbol, setStockDataFetched]);
 
-  // Fetch stock data
+  // Fetch stock data from API
   const fetchData = async (symbol) => {
     console.log(`Fetching data for ${symbol}`);
 
@@ -32,7 +50,7 @@ const StockDetails = ({ symbol, setStockDataFetched }) => {
     }
   };
 
-  // Display stock data
+  // Display loading message or error message if stock data is not yet fetched
   if (!stockData) {
     return (
       <div>
@@ -45,20 +63,27 @@ const StockDetails = ({ symbol, setStockDataFetched }) => {
     );
   }
 
-  // Get entries from stock data object
+  // Get entries from stock data object and format data for chart
   const dataEntries = Object.entries(stockData);
+  const chartData = {
+    labels: dataEntries.slice(0, 10).map(([date]) => date),
+    datasets: [
+      {
+        label: "Adjusted Close",
+        data: dataEntries
+          .slice(0, 10)
+          .map(([, stockInfo]) => stockInfo["5. adjusted close"]),
+        borderColor: "rgb(75, 192, 192)",
+        tension: 0.1,
+      },
+    ],
+  };
 
-  // Return stock details JSX
+  // Return stock details JSX with chart
   return (
     <div>
       <h2>Stock Details</h2>
-      <ul>
-        {dataEntries.slice(0, 10).map(([date, stockInfo]) => (
-          <li key={date}>
-            {date}: {stockInfo["5. adjusted close"]}
-          </li>
-        ))}
-      </ul>
+      <Line data={chartData} />
     </div>
   );
 };
