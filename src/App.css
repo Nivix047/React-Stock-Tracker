@@ -5,3 +5,12 @@
   z-index: 1000;
   padding: 4px;
 }
+
+.listItem {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.listItem:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}

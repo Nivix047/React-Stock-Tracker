@@ -1,8 +1,7 @@
 import React from "react";
+import "../App.css";
 
-// Watchlist component
 const Watchlist = ({ watchlist, removeFromWatchlist, setSelectedSymbol }) => {
-  // Return watchlist JSX
   return (
     <div>
       <h2>Watchlist</h2>
@@ -10,6 +9,7 @@ const Watchlist = ({ watchlist, removeFromWatchlist, setSelectedSymbol }) => {
         {watchlist.map((stock) => (
           <li
             key={stock["1. symbol"]}
+            className="listItem"
             onClick={() => setSelectedSymbol(stock["1. symbol"])}
           >
             {stock["2. name"]} ({stock["1. symbol"]})

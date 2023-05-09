@@ -1,8 +1,7 @@
 import React from "react";
+import "../App.css";
 
-// Search results component
 const SearchResult = ({ searchResults, addToWatchlist, setSelectedSymbol }) => {
-  // Return search results JSX
   return (
     <div>
       <h2>Search Results</h2>
@@ -10,6 +9,7 @@ const SearchResult = ({ searchResults, addToWatchlist, setSelectedSymbol }) => {
         {searchResults.map((result) => (
           <li
             key={result["1. symbol"]}
+            className="listItem"
             onClick={() => setSelectedSymbol(result["1. symbol"])}
           >
             {result["2. name"]} ({result["1. symbol"]})
