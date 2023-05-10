@@ -65,14 +65,17 @@ const StockDetails = ({ symbol, setStockDataFetched }) => {
 
   // Get entries from stock data object and format data for chart
   const dataEntries = Object.entries(stockData);
+  dataEntries.reverse();
+  const slicedEntries = dataEntries.slice(-30);
+
   const chartData = {
-    labels: dataEntries.slice(0, 10).map(([date]) => date),
+    labels: slicedEntries.map(([date]) => date),
     datasets: [
       {
         label: "Adjusted Close",
-        data: dataEntries
-          .slice(0, 10)
-          .map(([, stockInfo]) => stockInfo["5. adjusted close"]),
+        data: slicedEntries.map(
+          ([, stockInfo]) => stockInfo["5. adjusted close"]
+        ),
         borderColor: "rgb(75, 192, 192)",
         tension: 0.1,
       },
